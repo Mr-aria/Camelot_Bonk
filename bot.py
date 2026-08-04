@@ -379,28 +379,28 @@ async def register_handler(update: Update, context):
     if step == NAME_REAL:
         context.user_data['real_name'] = text
         context.user_data['register_step'] = NAME_CAMELOT
-        await update.message.reply_text("⚔️ نام خود در کملوت را وارد کنید:\n(برای لغو /cancel بزنید)", parse_mode='Markdown')
+        await update.message.reply_text(" نام کملوتی خود را وارد کنید:", parse_mode='Markdown')
         return NAME_CAMELOT
     elif step == NAME_CAMELOT:
         context.user_data['camelot_name'] = text
         context.user_data['register_step'] = NATIONAL_ID
-        await update.message.reply_text("🆔 کد ملی ۶ رقمی را وارد کنید:\n(برای لغو /cancel بزنید)", parse_mode='Markdown')
+        await update.message.reply_text("🆔 کد ملی خود را وارد کنید", parse_mode='Markdown')
         return NATIONAL_ID
     elif step == NATIONAL_ID:
         if not text.isdigit() or len(text) != 6:
-            await update.message.reply_text("❌ کد ملی ۶ رقم باید باشد. دوباره وارد کنید:")
+            await update.message.reply_text("❌ تلاش ناموفق!")
             return NATIONAL_ID
         db = get_db()
         c = db.cursor()
         c.execute('SELECT id FROM users WHERE national_id = ?', (text,))
         if c.fetchone():
             db.close()
-            await update.message.reply_text("❌ این کد ملی قبلاً ثبت شده. کد دیگری وارد کنید:")
+            await update.message.reply_text("❌ این کد ملی قبلاً ثبت شده. کدملی خود وارد کنید:")
             return NATIONAL_ID
         db.close()
         context.user_data['national_id'] = text
         context.user_data['register_step'] = PASSWORD
-        await update.message.reply_text("🔐 رمز ۴ رقمی برای حساب خود وارد کنید:\n(برای لغو /cancel بزنید)", parse_mode='Markdown')
+        await update.message.reply_text("🔐 رمز ۴ رقمی برای حساب خود وارد کنید و به یاد بسپارید.", parse_mode='Markdown')
         return PASSWORD
     elif step == PASSWORD:
         if not text.isdigit() or len(text) != 4:
@@ -416,7 +416,7 @@ async def register_handler(update: Update, context):
 آیا صحیح است؟"""
         keyboard = InlineKeyboardMarkup([
             [InlineKeyboardButton("✅ بله", callback_data="confirm_yes")],
-            [InlineKeyboardButton("❌ خیر (لغو)", callback_data="confirm_no")]
+            [InlineKeyboardButton("❌ خیر", callback_data="confirm_no")]
         ])
         await update.message.reply_text(confirm_text, reply_markup=keyboard, parse_mode='Markdown')
         return CONFIRM
@@ -442,7 +442,7 @@ async def confirm_callback(update: Update, context):
         c.execute('SELECT id FROM users WHERE national_id = ?', (national_id,))
         if c.fetchone():
             db.close()
-            await query.edit_message_text("❌ این کد ملی قبلاً ثبت شده. لطفاً با کد دیگری ثبت‌نام کنید.")
+            await query.edit_message_text("❌ این کد ملی قبلاً ثبت شده. لطفاً با کد ملی خود ثبت‌نام کنید.")
             return
         db.close()
         try:
@@ -780,7 +780,7 @@ async def transfer_amount_handler(update: Update, context):
         return TRANSFER_AMOUNT
     context.user_data['transfer_amount'] = amount
     context.user_data['transfer_step'] = TRANSFER_REASON
-    await update.message.reply_text(f"💰 مبلغ: {amount} ART\n📝 علت (اختیاری، «ندارد» برای رد):\n(برای لغو /cancel بزنید)")
+    await update.message.reply_text(f"💰 مبلغ: {amount} ART\n📝 علت (اختیاری، «- یا .» برای رد):\n(برای لغو /cancel بزنید)")
     return TRANSFER_REASON
 
 async def transfer_reason_handler(update: Update, context):
